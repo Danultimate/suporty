@@ -1,0 +1,44 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.lcov
+
+# Ruff / linters
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker volumes (if mounted locally)
+pgdata/
+ollama_data/
+
+# Logs
+*.log
+logs/
+
+# Memory (Claude Code internal — never commit)
+.claude/
+memory/
