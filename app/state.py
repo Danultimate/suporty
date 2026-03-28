@@ -16,3 +16,5 @@ class SupportState(TypedDict, total=False):
     sensitive: bool                  # controls local vs cloud LLM routing
     user_id: Optional[str]
     metadata: Optional[dict]
+    source: Optional[str]            # "freshdesk" | "api"
+    freshdesk_ticket_id: Optional[int]

@@ -11,6 +11,7 @@ import logging
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.state import SupportState
 from app.llm.router import get_llm
+from app.tools.freshdesk import post_resolution
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -96,13 +97,27 @@ async def resolve(state: SupportState) -> SupportState:
         needs_escalation,
     )
 
+    resolution_text = payload.get("resolution", "")
+
     update: SupportState = {
         **state,
-        "resolution": payload.get("resolution", ""),
+        "resolution": resolution_text,
         "confidence": confidence,
     }
 
     if needs_escalation:
         update["escalation_reason"] = payload.get("escalation_reason") or "Confidence below threshold"
+    else:
+        # Post resolution back to Freshdesk if this ticket came from there
+        fd_id = state.get("freshdesk_ticket_id")
+        if fd_id:
+            try:
+                await post_resolution(
+                    ticket_id=fd_id,
+                    resolution=resolution_text,
+                    confidence=confidence,
+                )
+            except Exception as exc:
+                logger.error("freshdesk: resolution post failed for ticket %s: %s", fd_id, exc)
 
     return update

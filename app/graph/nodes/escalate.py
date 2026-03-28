@@ -6,6 +6,7 @@ In production this would push to a queue (SQS, Redis, etc.) or call a ticketing 
 import logging
 from datetime import datetime, timezone
 from app.state import SupportState
+from app.tools.freshdesk import post_escalation
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +23,24 @@ async def escalate(state: SupportState) -> SupportState:
         "urgency": urgency,
         "reason": reason,
         "confidence": state.get("confidence", 0.0),
-        "resolution_draft": state.get("resolution"),  # attach draft if any
+        "resolution_draft": state.get("resolution"),
         "escalated_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    # TODO: replace with real queue / ticketing integration
-    # e.g.: await sqs_client.send_message(QueueUrl=..., MessageBody=json.dumps(payload))
     logger.warning("ESCALATE: ticket=%s urgency=%s reason=%s", ticket_id, urgency, reason)
+
+    # Post back to Freshdesk if this ticket originated there
+    fd_id = state.get("freshdesk_ticket_id")
+    if fd_id:
+        try:
+            await post_escalation(
+                ticket_id=fd_id,
+                reason=reason,
+                urgency=urgency,
+                draft=state.get("resolution"),
+            )
+        except Exception as exc:
+            logger.error("freshdesk: escalation post failed for ticket %s: %s", fd_id, exc)
 
     return {
         **state,

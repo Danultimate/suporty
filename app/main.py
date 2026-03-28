@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
+from app.api.freshdesk_webhook import router as freshdesk_router
 from app.db.pgvector import ensure_schema, close_pool
 from app.db.tickets import ensure_tickets_schema
 from app.config import settings
@@ -48,3 +49,4 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api/v1")
+app.include_router(freshdesk_router, prefix="/api/v1")
