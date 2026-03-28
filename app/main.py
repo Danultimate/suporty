@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.db.pgvector import ensure_schema, close_pool
+from app.db.tickets import ensure_tickets_schema
 from app.config import settings
 from app.observability import configure_logging
 
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Autonomous Support Architect — env=%s", settings.APP_ENV)
     try:
         await ensure_schema()
+        await ensure_tickets_schema()
         logger.info("Database schema verified")
     except Exception as exc:
         logger.error("DB schema init failed — app will still serve traffic: %s", exc)

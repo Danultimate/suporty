@@ -15,6 +15,7 @@ from typing import Optional
 from app.graph.graph import support_graph
 from app.api.background import process_ticket_async
 from app.db.pgvector import get_pool
+from app.db.tickets import save_ticket
 from app.config import settings
 
 router = APIRouter()
@@ -78,9 +79,27 @@ async def ingest_ticket(payload: TicketPayload):
         raise HTTPException(status_code=500, detail="Internal processing error")
 
     escalated = bool(final_state.get("escalation_reason"))
+    status = "escalated" if escalated else "resolved"
+
+    try:
+        await save_ticket(
+            ticket_id=ticket_id,
+            user_id=payload.user_id,
+            raw_text=payload.raw_text,
+            intent=final_state.get("intent"),
+            urgency=final_state.get("urgency"),
+            confidence=final_state.get("confidence", 0.0),
+            status=status,
+            resolution=final_state.get("resolution"),
+            escalation_reason=final_state.get("escalation_reason"),
+            sensitive=final_state.get("sensitive", False),
+        )
+    except Exception as exc:
+        logger.error("Failed to persist ticket %s: %s", ticket_id, exc)
+
     return TicketResponse(
         ticket_id=ticket_id,
-        status="escalated" if escalated else "resolved",
+        status=status,
         intent=final_state.get("intent"),
         urgency=final_state.get("urgency"),
         confidence=final_state.get("confidence", 0.0),
