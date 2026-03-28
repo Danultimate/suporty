@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     CRM_API_URL: str = "http://crm-stub:8001"
     CRM_API_KEY: str = ""
 
+    # Freshdesk
+    FRESHDESK_DOMAIN: str = ""   # e.g. yourcompany.freshdesk.com
+    FRESHDESK_API_KEY: str = ""
+
     # Confidence threshold below which tickets escalate
     ESCALATION_THRESHOLD: float = 0.75
 
