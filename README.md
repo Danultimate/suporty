@@ -58,8 +58,8 @@ ufw allow 80 && ufw allow 443
 ### One-shot deploy
 
 ```bash
-git clone https://github.com/Danultimate/suporty.git
-cd suporty
+git clone https://github.com/Danultimate/supporty.git
+cd supporty
 cp .env.example .env
 nano .env          # set OPENAI_API_KEY and POSTGRES_PASSWORD
 ./deploy.sh
