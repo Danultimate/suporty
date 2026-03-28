@@ -19,8 +19,11 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting Autonomous Support Architect — env=%s", settings.APP_ENV)
-    await ensure_schema()
-    logger.info("Database schema verified")
+    try:
+        await ensure_schema()
+        logger.info("Database schema verified")
+    except Exception as exc:
+        logger.error("DB schema init failed — app will still serve traffic: %s", exc)
     yield
     await close_pool()
     logger.info("Shutdown complete")
