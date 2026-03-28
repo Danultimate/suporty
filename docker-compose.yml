@@ -58,13 +58,12 @@ services:
         required: false
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-supporty}:${POSTGRES_PASSWORD:-supporty}@db:5432/${POSTGRES_DB:-supporty}
-    ports:
-      - "8438:8501"
     depends_on:
       db:
         condition: service_healthy
     networks:
       - internal
+      - external
 
   # ── Nginx reverse proxy ────────────────────────────────────────────────────
   nginx:
